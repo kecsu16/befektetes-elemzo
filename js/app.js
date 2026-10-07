@@ -3,6 +3,9 @@ import { initTheme } from "./theme.js";
 import { isStale } from "./freshness.js";
 import { fmtAgo } from "./format.js";
 import { render as renderOverview } from "./views/overview.js";
+import { render as renderTicker } from "./views/ticker.js";
+import { render as renderList } from "./views/list.js";
+import { hideTooltip } from "./tooltips.js";
 
 const view = () => document.getElementById("view");
 const TABS = ["attekintes", "papirok", "portfolio", "elorejelzes", "megtakaritas"];
@@ -65,10 +68,17 @@ function route() {
   const active = tab === "papir" ? "papirok" : (known ? tab : "attekintes");
   document.querySelectorAll("#tabs a").forEach((a) => a.classList.toggle("active", a.dataset.tab === active));
   const root = view();
+  hideTooltip();
+  let ticker = null;
+  try { ticker = arg ? decodeURIComponent(arg) : null; } catch { ticker = null; }
   if (active === "attekintes") {
     renderOverview(root).then(updateFreshness);
+  } else if (tab === "papir" && ticker) {
+    renderTicker(root, ticker);
+  } else if (active === "papirok") {
+    renderList(root);
   } else {
-    const name = tab === "papir" && arg ? `Papír: ${decodeURIComponent(arg)}` : TAB_NAMES[active];
+    const name = TAB_NAMES[active];
     root.replaceChildren(el("section", { className: "card" },
       el("h2", { textContent: name }),
       el("p", { className: "muted", textContent: "Hamarosan." })));
