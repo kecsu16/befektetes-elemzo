@@ -1,0 +1,75 @@
+[
+ {
+  "name": "bankbetet_3ev",
+  "initial": 1000000,
+  "monthly": 0,
+  "years": 3,
+  "inflation": 0.04,
+  "product": {
+   "id": "bankbetet",
+   "nev": "Bankbetét",
+   "hozam": 0.03,
+   "adokulcs": 0.15,
+   "szocho": 0.13,
+   "adomentes_evek": null,
+   "tbsz": false,
+   "visszaterites": null,
+   "kedvezmeny": null
+  },
+  "expected": {
+   "nominal_fv": 1094051.4007728621,
+   "net_fv": 1067717.0085564607,
+   "real_fv": 949196.5326976955
+  }
+ },
+ {
+  "name": "nyugdij_10ev",
+  "initial": 0,
+  "monthly": 50000,
+  "years": 10,
+  "inflation": 0.04,
+  "product": {
+   "id": "onkentes_nyugdij",
+   "nev": "Önkéntes nyugdíjpénztár",
+   "hozam": 0.05,
+   "adokulcs": 0.15,
+   "szocho": 0.13,
+   "adomentes_evek": 10,
+   "tbsz": false,
+   "visszaterites": {
+    "arany": 0.2,
+    "plafon_huf": 150000
+   },
+   "kedvezmeny": null
+  },
+  "expected": {
+   "nominal_fv": 9281671.821726555,
+   "net_fv": 9281671.821726555,
+   "real_fv": 6270364.9095585365
+  }
+ },
+ {
+  "name": "allampapir_5ev",
+  "initial": 200000,
+  "monthly": 10000,
+  "years": 5,
+  "inflation": 0.04,
+  "product": {
+   "id": "pmap",
+   "nev": "PMÁP",
+   "hozam": null,
+   "inflacio_plusz": 0.01,
+   "adokulcs": 0.0,
+   "szocho": 0.0,
+   "adomentes_evek": null,
+   "tbsz": false,
+   "visszaterites": null,
+   "kedvezmeny": null
+  },
+  "expected": {
+   "nominal_fv": 936732.5641091327,
+   "net_fv": 936732.5641091327,
+   "real_fv": 769925.8862254884
+  }
+ }
+]

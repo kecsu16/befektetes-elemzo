@@ -89,3 +89,9 @@ table.accuracy td.note { font-size: .85rem; color: var(--muted); border-bottom: 
 table.accuracy tr.bad td.note { color: var(--neg); }
 .donuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
 .warn-list li { color: var(--warn-text); }
+.warn-banner { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-text); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 12px 0; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; color: var(--muted); }
+.field input, input.rate { font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+input.rate { width: 5.5em; }
+table.savings tr.best td { font-weight: 600; }
