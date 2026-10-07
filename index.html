@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Befektetési elemző</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js" integrity="sha512-k37wQcV4v2h6jgYf5IUz1MoSKPpDs630XGSmCaCCOXxy2awgAWKHGZWr9nMyGgk3IOxA1NxdkN8r1JHgkUtMoQ==" crossorigin="anonymous"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Befektetési elemző</h1>
+    <nav id="tabs" aria-label="Fő navigáció">
+      <a href="#attekintes" data-tab="attekintes">Áttekintés</a>
+      <a href="#papirok" data-tab="papirok">Papírok</a>
+      <a href="#portfolio" data-tab="portfolio">Portfólió</a>
+      <a href="#elorejelzes" data-tab="elorejelzes">Előrejelzés</a>
+      <a href="#megtakaritas" data-tab="megtakaritas">Megtakarítás</a>
+    </nav>
+    <div class="actions">
+      <button id="theme-toggle" type="button" aria-label="Téma váltása">Téma</button>
+      <button id="logout" type="button" hidden>Kilépés</button>
+    </div>
+  </header>
+  <div id="freshness" class="freshness" role="status" hidden></div>
+  <main id="view"></main>
+  <footer class="footer">Elemzőeszköz, nem befektetési tanács.</footer>
+</body>
+</html>
