@@ -2,7 +2,7 @@ import { fetchData } from "../api.js";
 import { fmtNum, fmtPct, fmtMoney, fmtAgo } from "../format.js";
 import { el, card, kvTable, gridTable, chartBox } from "../dom.js";
 import { valuationAxisOption, priceChartOption, forecastChartOption } from "../charts.js";
-import { fanData, accuracyRows } from "../forecastutil.js";
+import { fanData, accuracyRows, fmtProb } from "../forecastutil.js";
 import { reverseDcfSentence } from "./listutil.js";
 import { attachTooltip } from "../tooltips.js";
 
@@ -200,7 +200,7 @@ export function forecastSection(d) {
   const probRows = Object.entries(f.horizons).map(([h, x]) => [
     HZ[h] || `${h} nap`,
     `${fmtMoney(g(x, "ensemble", "5"), ccy)} – ${fmtMoney(g(x, "ensemble", "50"), ccy)} – ${fmtMoney(g(x, "ensemble", "95"), ccy)}`,
-    fmtPct(x.p_above_now), fmtPct(x.p_below_buy),
+    fmtProb(x.p_above_now), fmtProb(x.p_below_buy),
   ]);
   const kids = [
     el("p", { className: "muted", textContent: "Valószínűségi becslés, nem pontos jóslat. A sávok azt mutatják, hová eshet az ár a modellek szerint; a súlyokat a múltbeli pontosság (walk-forward backtest) adja." }),

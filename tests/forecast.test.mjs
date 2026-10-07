@@ -22,7 +22,10 @@ test("legyező: az utolsó árból indul, a horizontoknál vannak értékek", ()
   assert.equal(f.lo90[21], 90);
   assert.equal(f.band90[21], 20);          // q95 − q5 (halmozott sáv)
   assert.equal(f.band50[126], 20);
-  assert.equal(f.q50[5], null);           // köztes napok üresek (összekötve rajzoljuk)
+  // köztes napok lineárisan interpolálva (a halmozott sáv nem eshet nullára)
+  assert.ok(Math.abs(f.q50[73] - (100 + (102 - 100) * (73 - 21) / (126 - 21))) < 1e-9);
+  assert.ok(Math.abs(f.band90[10] - 20 * 10 / 21) < 1e-9);
+  assert.equal(f.q50[127], null);          // az utolsó horizont után nincs érték
 });
 
 test("legyező üres, ha nincs ensemble", () => {
@@ -54,4 +57,12 @@ test("modellek összesítése több papír backtestjéből", async () => {
   assert.equal(g.beats, 1); assert.equal(g.tested, 2);
   assert.equal(g.avgWeight, 0.5); assert.ok(Math.abs(g.avgCov90 - 0.8) < 1e-12);
   assert.ok(!s.find((m) => m.key === "index"));
+});
+
+test("valószínűség kijelzése a sávon kívül: < 5% / > 95%", async () => {
+  const { fmtProb } = await import("../js/forecastutil.js");
+  assert.equal(fmtProb(0), "< 5%");
+  assert.equal(fmtProb(0.97), "> 95%");
+  assert.equal(fmtProb(0.5), "50%");
+  assert.equal(fmtProb(null), "nincs adat");
 });

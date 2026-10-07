@@ -1,7 +1,7 @@
 import { fetchData } from "../api.js";
 import { fmtPct, fmtNum } from "../format.js";
 import { el, card, gridTable } from "../dom.js";
-import { MODEL_NAMES, summarizeModels } from "../forecastutil.js";
+import { MODEL_NAMES, summarizeModels, fmtProb } from "../forecastutil.js";
 
 export async function render(root) {
   root.replaceChildren(card("Előrejelzés", el("p", { className: "muted", textContent: "Betöltés…" })));
@@ -16,8 +16,8 @@ export async function render(root) {
   const rows = data.map((d) => {
     const h = d.forecast?.horizons || {};
     return [d.ticker, fmtNum(d.price),
-      fmtPct(h["21"]?.p_above_now, 0), fmtPct(h["126"]?.p_above_now, 0), fmtPct(h["252"]?.p_above_now, 0),
-      fmtPct(h["126"]?.p_below_buy, 0), fmtPct(h["252"]?.p_below_buy, 0)];
+      fmtProb(h["21"]?.p_above_now), fmtProb(h["126"]?.p_above_now), fmtProb(h["252"]?.p_above_now),
+      fmtProb(h["126"]?.p_below_buy), fmtProb(h["252"]?.p_below_buy)];
   });
   const link = gridTable(["Papír", "Ár", "P(felett) 1 hó", "P(felett) 6 hó", "P(felett) 1 év", "P(vételi szint alatt) 6 hó", "P(vételi szint alatt) 1 év"], rows);
   link.querySelectorAll("tbody tr").forEach((tr, i) => {

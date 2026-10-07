@@ -33,11 +33,18 @@ export function fanData(lastIso, lastPrice, horizons, n = 253) {
   const put = (i, q5, q25, q50, q75, q95) => {
     f.q50[i] = q50; f.lo90[i] = q5; f.band90[i] = q95 - q5; f.lo50[i] = q25; f.band50[i] = q75 - q25;
   };
-  put(0, lastPrice, lastPrice, lastPrice, lastPrice, lastPrice);
-  for (const [h, q] of anchors) {
-    if (["5", "25", "75", "95"].every((k) => Number.isFinite(q[k]))) put(h, q["5"], q["25"], q["50"], q["75"], q["95"]);
-    else f.q50[h] = q["50"];
+  // Csak a teljes sávot adó horizontok; köztük lineáris interpoláció, hogy a halmozott sáv folytonos legyen.
+  const pts = [[0, [lastPrice, lastPrice, lastPrice, lastPrice, lastPrice]],
+    ...anchors.filter(([, q]) => ["5", "25", "75", "95"].every((k) => Number.isFinite(q[k])))
+      .sort((a, b) => a[0] - b[0]).map(([h, q]) => [h, [q["5"], q["25"], q["50"], q["75"], q["95"]]])];
+  for (let j = 0; j + 1 < pts.length; j++) {
+    const [h0, a] = pts[j], [h1, b] = pts[j + 1];
+    for (let i = h0; i <= h1; i++) {
+      const t = (i - h0) / (h1 - h0);
+      put(i, ...a.map((x, k) => x + (b[k] - x) * t));
+    }
   }
+  if (pts.length === 1) put(0, ...pts[0][1]);
   return f;
 }
 
@@ -70,4 +77,12 @@ export function summarizeModels(bts) {
   }
   const mean = (xs) => (xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null);
   return [...acc.values()].map((a) => ({ key: a.key, beats: a.beats, tested: a.tested, avgWeight: mean(a.w), avgCov90: mean(a.cov) }));
+}
+
+// A kvantilisekből csak az 5–95%-os sávon belül becsülhető megbízhatóan a valószínűség.
+export function fmtProb(p) {
+  if (typeof p !== "number" || !Number.isFinite(p)) return "nincs adat";
+  if (p < 0.05) return "< 5%";
+  if (p > 0.95) return "> 95%";
+  return `${Math.round(p * 100)}%`;
 }
