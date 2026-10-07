@@ -1,7 +1,8 @@
 import { fetchData } from "../api.js";
 import { fmtNum, fmtPct, fmtMoney, fmtAgo } from "../format.js";
 import { el, card, kvTable, gridTable, chartBox } from "../dom.js";
-import { valuationAxisOption, priceChartOption } from "../charts.js";
+import { valuationAxisOption, priceChartOption, forecastChartOption } from "../charts.js";
+import { fanData, accuracyRows } from "../forecastutil.js";
 import { reverseDcfSentence } from "./listutil.js";
 import { attachTooltip } from "../tooltips.js";
 
@@ -25,6 +26,7 @@ export async function render(root, ticker) {
   root.replaceChildren(
     header(d),
     priceSection(d),
+    forecastSection(d),
     valuationSection(d, val, dcf, ccy),
     sensitivitySection(val),
     qualitySection(d.fundamentals || {}),
@@ -184,4 +186,48 @@ function missingSection(missing) {
     el("ul", {}, ...missing.map((m) => el("li", { textContent: m }))));
   box.classList.add("missing-box");
   return box;
+}
+
+const HZ = { "21": "1 hónap", "126": "6 hónap", "252": "1 év" };
+
+export function forecastSection(d) {
+  const f = d.forecast;
+  if (!f) return card("Előrejelzés", el("p", { className: "muted", textContent: "nincs adat (csak a saját és figyelt papírokhoz készül)" }));
+  const s = g(d, "technical", "series");
+  const last = s?.dates?.[s.dates.length - 1];
+  const fan = last ? fanData(last, d.price, f.horizons) : null;
+  const ccy = d.currency || "USD";
+  const probRows = Object.entries(f.horizons).map(([h, x]) => [
+    HZ[h] || `${h} nap`,
+    `${fmtMoney(g(x, "ensemble", "5"), ccy)} – ${fmtMoney(g(x, "ensemble", "50"), ccy)} – ${fmtMoney(g(x, "ensemble", "95"), ccy)}`,
+    fmtPct(x.p_above_now), fmtPct(x.p_below_buy),
+  ]);
+  const kids = [
+    el("p", { className: "muted", textContent: "Valószínűségi becslés, nem pontos jóslat. A sávok azt mutatják, hová eshet az ár a modellek szerint; a súlyokat a múltbeli pontosság (walk-forward backtest) adja." }),
+    s ? chartBox(() => forecastChartOption(s, fan), 320) : null,
+    gridTable(["Horizont", "5% – medián – 95%", "P(a mai ár felett)", "P(a vételi szint alatt)"], probRows),
+    kvTable([["GARCH-volatilitás (évesített, 1 hó)", fmtPct(f.garch_vol_annual), "garch_vol_annual"]]),
+  ];
+  for (const h of Object.keys(f.backtest || {})) kids.push(el("h3", { textContent: `Modellpontosság — ${HZ[h] || h + " nap"}-os horizont (walk-forward backtest)` }), accuracyTable(f.backtest[h]));
+  return card("Előrejelzés", ...kids.filter(Boolean));
+}
+
+export function accuracyTable(bt) {
+  const t = el("table", { className: "grid accuracy" });
+  const hr = t.createTHead().insertRow();
+  const heads = [["Modell"], ["Súly"], ["MAE", "mae"], ["MAPE", "mape"], ["Találati arány", "hit_rate"], ["90%-os sávban", "cov90"], ["50%-os sávban", "cov50"], ["n"]];
+  for (const [h, tip] of heads) { const th = el("th", { textContent: h }); if (tip) attachTooltip(th, tip); hr.append(th); }
+  const body = t.createTBody();
+  for (const r of accuracyRows(bt)) {
+    const tr = body.insertRow();
+    if (r.bad) tr.className = "bad";
+    const cells = [r.name, r.key === "index" ? "–" : fmtPct(r.weight, 0), fmtNum(r.mae), fmtPct(r.mape), fmtPct(r.hit_rate, 0), fmtPct(r.cov90, 0), fmtPct(r.cov50, 0), String(r.n ?? 0)];
+    cells.forEach((v, i) => { const td = tr.insertCell(); td.textContent = v; if (i) td.className = "num"; });
+    if (r.note) {
+      const nr = body.insertRow();
+      if (r.bad) nr.className = "bad";
+      const td = nr.insertCell(); td.colSpan = 8; td.className = "note"; td.textContent = r.note;
+    }
+  }
+  return el("div", { className: "table-wrap" }, t);
 }

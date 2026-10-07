@@ -5,6 +5,8 @@ import { fmtAgo } from "./format.js";
 import { render as renderOverview } from "./views/overview.js";
 import { render as renderTicker } from "./views/ticker.js";
 import { render as renderList } from "./views/list.js";
+import { render as renderForecast } from "./views/forecast.js";
+import { render as renderPortfolio } from "./views/portfolio.js";
 import { hideTooltip } from "./tooltips.js";
 
 const view = () => document.getElementById("view");
@@ -77,6 +79,10 @@ function route() {
     renderTicker(root, ticker);
   } else if (active === "papirok") {
     renderList(root);
+  } else if (active === "portfolio") {
+    renderPortfolio(root);
+  } else if (active === "elorejelzes") {
+    renderForecast(root);
   } else {
     const name = TAB_NAMES[active];
     root.replaceChildren(el("section", { className: "card" },

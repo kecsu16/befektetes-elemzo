@@ -55,3 +55,16 @@ test("tooltip minden kötelező mutatóhoz", async () => {
   const need = ["pe","forward_pe","peg","ev_ebitda","ev_sales","pb","p_fcf","div_yield","fcf_yield","piotroski","altman_z","beneish_m","roic_minus_wacc","net_debt_ebitda","interest_coverage","current_ratio","sharpe","sortino","calmar","information_ratio","mdd","hist_var","param_var","rsi","macd","atr","stochastic","beta","vol_annual"];
   for (const k of need) assert.ok(TOOLTIPS[k]?.mit && TOOLTIPS[k]?.jo, k);
 });
+
+test("előrejelzési grafikon: utolsó 1 év + legyező egy tengelyen", async () => {
+  const { forecastChartOption } = await import("../js/charts.js");
+  const { fanData } = await import("../js/forecastutil.js");
+  const n = 300;
+  const s = { dates: Array.from({ length: n }, (_, i) => `d${i}`), close: Array(n).fill(100), sma50: Array(n).fill(null), sma200: Array(n).fill(null) };
+  const fan = fanData("2026-10-07", 100, { "21": { ensemble: { "5": 90, "25": 95, "50": 100, "75": 105, "95": 110 } } }, 30);
+  const opt = forecastChartOption(s, fan, COLORS);
+  assert.equal(opt.xAxis.data.length, 252 + 29);
+  const names = opt.series.map((x) => x.name);
+  assert.ok(names.includes("Medián előrejelzés") && names.includes("5–95% sáv") && names.includes("25–75% sáv"));
+  for (const x of opt.series) assert.equal(x.data.length, opt.xAxis.data.length);
+});

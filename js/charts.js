@@ -61,3 +61,79 @@ export function priceChartOption(series, bands = null, c = themeColors()) {
   if (bands) out.series.push(...bands);
   return out;
 }
+
+// Utolsó 1 év ár + előrejelzési legyező (5–95 halvány, 25–75 erősebb sáv, medián).
+export function forecastChartOption(series, fan, c = themeColors(), histDays = 252) {
+  const s = series || { dates: [], close: [] };
+  const k = Math.max(0, s.dates.length - histDays);
+  const hDates = s.dates.slice(k);
+  const fDates = fan ? fan.dates.slice(1) : [];
+  const pad = (n) => new Array(n).fill(null);
+  const hist = (arr) => [...(arr || []).slice(k), ...pad(fDates.length)];
+  const fut = (arr) => [...pad(hDates.length - 1), ...arr];
+  const base = priceChartOption({ dates: [...hDates, ...fDates], close: hist(s.close), sma50: hist(s.sma50), sma200: hist(s.sma200) }, null, c);
+  if (!fan) return base;
+  const band = (name, lo, width, stack, opacity) => [
+    { name: `${name}-alap`, type: "line", data: fut(lo), stack, connectNulls: true, showSymbol: false,
+      lineStyle: { opacity: 0 }, itemStyle: { opacity: 0 }, tooltip: { show: false }, legendHoverLink: false },
+    { name, type: "line", data: fut(width), stack, connectNulls: true, showSymbol: false,
+      lineStyle: { opacity: 0 }, itemStyle: { color: c.accent }, areaStyle: { color: c.accent, opacity } },
+  ];
+  base.series.push(
+    ...band("5–95% sáv", fan.lo90, fan.band90, "b90", 0.15),
+    ...band("25–75% sáv", fan.lo50, fan.band50, "b50", 0.3),
+    { name: "Medián előrejelzés", type: "line", data: fut(fan.q50), connectNulls: true, showSymbol: true, symbolSize: 5,
+      lineStyle: { color: c.accent, type: "dashed", width: 2 }, itemStyle: { color: c.accent } },
+  );
+  base.legend.data = ["Záróár", "SMA50", "SMA200", "5–95% sáv", "25–75% sáv", "Medián előrejelzés"];
+  return base;
+}
+
+export function donutOption(items, c = themeColors()) {
+  return {
+    animation: false,
+    tooltip: { trigger: "item", formatter: (p) => `${p.name}: ${(p.value * 100).toFixed(1)}%` },
+    series: [{ type: "pie", radius: ["45%", "70%"], data: items, label: { color: c.text, formatter: (p) => `${p.name}\n${(p.value * 100).toFixed(0)}%` } }],
+  };
+}
+
+export function barOption(labels, values, c = themeColors(), pct = true) {
+  return {
+    animation: false, grid: { left: 64, right: 16, top: 16, bottom: 40 },
+    tooltip: { trigger: "axis", valueFormatter: (v) => (pct ? `${(v * 100).toFixed(1)}%` : v) },
+    xAxis: { type: "category", data: labels, axisLabel: { color: c.muted } },
+    yAxis: { type: "value", axisLabel: { color: c.muted, formatter: (v) => (pct ? `${(v * 100).toFixed(0)}%` : v) }, splitLine: { lineStyle: { color: c.border } } },
+    series: [{ type: "bar", data: values, itemStyle: { color: c.accent } }],
+  };
+}
+
+export function frontierOption(frontier, points, c = themeColors()) {
+  const pct = (v) => `${(v * 100).toFixed(0)}%`;
+  return {
+    animation: false, grid: { left: 56, right: 16, top: 32, bottom: 48 },
+    legend: { top: 0, textStyle: { color: c.text } },
+    tooltip: { trigger: "item", formatter: (p) => `${p.seriesName}: hozam ${pct(p.value[1])}, volatilitás ${pct(p.value[0])}` },
+    xAxis: { type: "value", name: "volatilitás", nameLocation: "middle", nameGap: 28, scale: true, axisLabel: { color: c.muted, formatter: pct }, splitLine: { lineStyle: { color: c.border } } },
+    yAxis: { type: "value", name: "várható hozam", scale: true, axisLabel: { color: c.muted, formatter: pct }, splitLine: { lineStyle: { color: c.border } } },
+    series: [
+      { name: "Hatékony határ", type: "line", data: (frontier || []).map((p) => [p.vol, p.ret]), showSymbol: false, lineStyle: { color: c.accent } },
+      ...points.filter((p) => p.pt).map((p) => ({ name: p.name, type: "scatter", data: [[p.pt.vol, p.pt.ret]], symbolSize: 12, itemStyle: { color: c[p.color] || c.text } })),
+    ],
+  };
+}
+
+export function growthOption(seriesMap, c = themeColors()) {
+  const palette = [c.accent, c.pos, c.neg, c.muted];
+  const entries = Object.entries(seriesMap).filter(([, s]) => s?.dates?.length);
+  const dates = entries.length ? entries[0][1].dates : [];
+  return {
+    animation: false, grid: { left: 48, right: 16, top: 32, bottom: 40 },
+    legend: { top: 0, textStyle: { color: c.text } }, tooltip: { trigger: "axis" },
+    xAxis: { type: "category", data: dates, axisLabel: { color: c.muted } },
+    yAxis: { type: "value", scale: true, axisLabel: { color: c.muted }, splitLine: { lineStyle: { color: c.border } } },
+    series: entries.map(([name, s], i) => {
+      const m = new Map(s.dates.map((d, j) => [d, s.values[j]]));
+      return { name, type: "line", showSymbol: false, data: dates.map((d) => m.get(d) ?? null), connectNulls: true, lineStyle: { color: palette[i % 4], width: i ? 1.5 : 2.5 }, itemStyle: { color: palette[i % 4] } };
+    }),
+  };
+}

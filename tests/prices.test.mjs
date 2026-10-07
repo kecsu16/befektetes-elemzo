@@ -23,3 +23,10 @@ test("effectiveUpdated: prices.json az elsődleges, meta a tartalék", () => {
   assert.equal(effectiveUpdated(null, { prices_updated: "b" }), "b");
   assert.equal(effectiveUpdated(null, null), null);
 });
+
+test("hibaszám: csak a tényleges hibákat számolja kategóriánként", async () => {
+  const { errorCount } = await import("../js/prices.js");
+  assert.equal(errorCount({ prices: {}, daily: {} }), 0);
+  assert.equal(errorCount({ prices: { BAD: "x" }, daily: { A: "y", B: "z" } }), 3);
+  assert.equal(errorCount(null), 0);
+});

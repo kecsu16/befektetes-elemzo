@@ -84,3 +84,8 @@ a { color: var(--accent); }
 :root { color-scheme: light dark; }
 :root[data-theme=light] { color-scheme: light; }
 :root[data-theme=dark] { color-scheme: dark; }
+table.accuracy tr.bad td { color: var(--neg); }
+table.accuracy td.note { font-size: .85rem; color: var(--muted); border-bottom: 1px solid var(--border); padding-top: 0; }
+table.accuracy tr.bad td.note { color: var(--neg); }
+.donuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.warn-list li { color: var(--warn-text); }
