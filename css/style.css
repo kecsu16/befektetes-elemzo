@@ -2,18 +2,21 @@
   --bg: #f6f7f9; --surface: #ffffff; --text: #1b1f24; --muted: #5b6672;
   --border: #d9dee4; --accent: #1f6feb; --accent-text: #ffffff;
   --warn-bg: #fff4d6; --warn-text: #6b4a00; --err: #b42318;
+  --pos: #1a7f37; --neg: #b42318;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
     --bg: #0f1318; --surface: #181e25; --text: #e6eaef; --muted: #98a3b0;
     --border: #2b343e; --accent: #5b9bff; --accent-text: #0b1220;
     --warn-bg: #3a2e0a; --warn-text: #ffd978; --err: #ff8a80;
+    --pos: #56d364; --neg: #ff8a80;
   }
 }
 [data-theme=dark] {
   --bg: #0f1318; --surface: #181e25; --text: #e6eaef; --muted: #98a3b0;
   --border: #2b343e; --accent: #5b9bff; --accent-text: #0b1220;
   --warn-bg: #3a2e0a; --warn-text: #ffd978; --err: #ff8a80;
+  --pos: #56d364; --neg: #ff8a80;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; overflow-x: hidden; }
@@ -48,3 +51,9 @@ pre { overflow-x: auto; background: var(--bg); padding: 12px; border-radius: 6px
 .tip { border-bottom: 1px dotted var(--muted); cursor: help; }
 .tooltip-pop { position: absolute; z-index: 10; max-width: 260px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: .9rem; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
 .footer { text-align: center; color: var(--muted); padding: 16px; font-size: .9rem; }
+.table-wrap { overflow-x: auto; }
+table.prices { border-collapse: collapse; width: 100%; }
+table.prices th, table.prices td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+table.prices .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.prices .pos { color: var(--pos); }
+table.prices .neg { color: var(--neg); }
